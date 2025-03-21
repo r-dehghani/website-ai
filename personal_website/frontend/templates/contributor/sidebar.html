@@ -1,0 +1,32 @@
+<div class="dashboard-sidebar">
+    <div class="user-info">
+        <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" class="user-avatar">
+        <div class="user-details">
+            <h3>{{ current_user.name }}</h3>
+            <span class="user-role">{{ current_user.role|title }}</span>
+        </div>
+    </div>
+    
+    <nav class="dashboard-nav">
+        <ul>
+            <li {% if request.path == '/contributor/dashboard' %}class="active"{% endif %}>
+                <a href="/contributor/dashboard"><i class="icon-dashboard"></i> Dashboard</a>
+            </li>
+            <li {% if request.path == '/contributor/articles' %}class="active"{% endif %}>
+                <a href="/contributor/articles"><i class="icon-articles"></i> My Articles</a>
+            </li>
+            <li {% if request.path == '/contributor/new-article' %}class="active"{% endif %}>
+                <a href="/contributor/new-article"><i class="icon-add"></i> New Article</a>
+            </li>
+            <li {% if request.path == '/contributor/drafts' %}class="active"{% endif %}>
+                <a href="/contributor/drafts"><i class="icon-draft"></i> Drafts</a>
+            </li>
+            <li {% if request.path == '/contributor/comments' %}class="active"{% endif %}>
+                <a href="/contributor/comments"><i class="icon-comment"></i> Comments</a>
+            </li>
+            <li {% if request.path == '/profile' %}class="active"{% endif %}>
+                <a href="/profile"><i class="icon-user"></i> Profile</a>
+            </li>
+        </ul>
+    </nav>
+</div>

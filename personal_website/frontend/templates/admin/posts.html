@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Articles Management | Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    {% include 'admin/sidebar.html' %}
+    
+    <div class="admin-content">
+        <div class="admin-header">
+            <div class="breadcrumb">
+                <a href="/admin/dashboard">Dashboard</a>
+                <span>/</span>
+                <a href="/admin/articles">Articles</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="/admin/articles/create" class="btn btn-primary">
+                    <i class="icon-add-article"></i> Create Article
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-main">
+            <div class="content-header">
+                <h1>Articles Management</h1>
+                <p>Create, edit, and manage articles on your website.</p>
+            </div>
+            
+            {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.type }}">
+                    {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="filter-tools">
+                <div class="search-box">
+                    <form action="/admin/articles" method="get">
+                        <input type="text" name="search" placeholder="Search articles..." value="{{ search }}">
+                        <button type="submit" class="search-btn"><i class="icon-search"></i></button>
+                    </form>
+                </div>
+                
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <label for="category-filter">Category:</label>
+                        <select id="category-filter" name="category_id" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status-filter">Status:</label>
+                        <select id="status-filter" name="status" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            <option value="published" {% if status == 'published' %}selected{% endif %}>Published</option>
+                            <option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option>
+                            <option value="archived" {% if status == 'archived' %}selected{% endif %}>Archived</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="author-filter">Author:</label>
+                        <select id="author-filter" name="author_id" onchange="this.form.submit()">
+                            <option value="">All Authors</option>
+                            {% for author in authors %}
+                            <option value="{{ author.id }}" {% if author_id == author.id %}selected{% endif %}>{{ author.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bulk-actions">
+                <div class="select-all-container">
+                    <input type="checkbox" id="select-all" class="select-all">
+                    <label for="select-all">Select All</label>
+                </div>
+                
+                <div class="bulk-actions-options">
+                    <select id="bulk-action">
+                        <option value="">Bulk Actions</option>
+                        <option value="publish">Publish</option>
+                        <option value="draft">Move to Draft</option>
+                        <option value="archive">Archive</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    
+                    <button type="button" id="apply-bulk-action" class="btn btn-secondary">Apply</button>
+                </div>
+            </div>
+            
+            <div class="data-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <input type="checkbox" class="select-all-checkbox">
+                            </th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Comments</th>
+                            <th>Views</th>
+                            <th>Published</th>
+                            <th class="actions-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="row-checkbox" data-id="{{ article.id }}">
+                            </td>
+                            <td class="article-title">
+                                <a href="/articles/{{ article.slug }}" target="_blank">{{ article.title }}</a>
+                                {% if article.featured %}
+                                <span class="featured-badge">Featured</span>
+                                {% endif %}
+                            </td>
+                            <td class="article-author">
+                                <img src="{{ article.author.avatar }}" alt="{{ article.author.name }}" class="user-avatar-small">
+                                <span>{{ article.author.name }}</span>
+                            </td>
+                            <td>{{ article.category.name }}</td>
+                            <td>
+                                <span class="status-badge status-{{ article.status|lower }}">{{ article.status|title }}</span>
+                            </td>
+                            <td>{{ article.comments_count }}</td>
+                            <td>{{ article.views_count }}</td>
+                            <td>{{ article.published_at.strftime('%b %d, %Y') if article.published_at else '-' }}</td>
+                            <td class="actions">
+                                <div class="dropdown">
+                                    <button class="action-btn dropdown-toggle" title="Actions">
+                                        <i class="icon-more"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a href="/admin/articles/edit/{{ article.id }}" class="dropdown-item">
+                                            <i class="icon-edit"></i> Edit
+                                        </a>
+                                        <a href="/articles/{{ article.slug }}" target="_blank" class="dropdown-item">
+                                            <i class="icon-view"></i> View
+                                        </a>
+                                        
+                                        {% if article.status != 'published' %}
+                                        <button class="dropdown-item publish-btn" data-id="{{ article.id }}">
+                                            <i class="icon-publish"></i> Publish
+                                        </button>
+                                        {% else %}
+                                        <button class="dropdown-item draft-btn" data-id="{{ article.id }}">
+                                            <i class="icon-draft"></i> Draft
+                                        </button>
+                                        {% endif %}
+                                        
+                                        {% if not article.featured %}
+                                        <button class="dropdown-item feature-btn" data-id="{{ article.id }}">
+                                            <i class="icon-star"></i> Feature
+                                        </button>
+                                        {% else %}
+                                        <button class="dropdown-item unfeature-btn" data-id="{{ article.id }}">
+                                            <i class="icon-star-outline"></i> Unfeature
+                                        </button>
+                                        {% endif %}
+                                        
+                                        <button class="dropdown-item duplicate-btn" data-id="{{ article.id }}">
+                                            <i class="icon-duplicate"></i> Duplicate
+                                        </button>
+                                        
+                                        <button class="dropdown-item delete-btn" data-id="{{ article.id }}" data-type="article">
+                                            <i class="icon-delete"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if not articles %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="icon-articles"></i>
+                    </div>
+                    <h3>No Articles Found</h3>
+                    <p>There are no articles matching your criteria.</p>
+                    <a href="/admin/articles/create" class="btn btn-primary">Create Article</a>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if pagination.pages > 1 %}
+            <div class="pagination">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('admin.articles', page=pagination.prev_num, search=search, category_id=category_id, status=status, author_id=author_id) }}" class="pagination-prev">
+                    <i class="icon-arrow-left"></i> Previous
+                </a>
+                {% endif %}
+                
+                <div class="pagination-pages">
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            {% if page != pagination.page %}
+                            <a href="{{ url_for('admin.articles', page=page, search=search, category_id=category_id, status=status, author_id=author_id) }}" class="pagination-link">{{ page }}</a>
+                            {% else %}
+                            <span class="pagination-link current">{{ page }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="pagination-ellipsis">...</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if pagination.has_next %}
+                <a href="{{ url_for('admin.articles', page=pagination.next_num, search=search, category_id=category_id, status=status, author_id=author_id) }}" class="pagination-next">
+                    Next <i class="icon-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the selected article(s)? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" action="/admin/articles/delete" method="post">
+                    <input type="hidden" name="article_ids" id="deleteArticleIds">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Toggle dropdown menu
+        $('.dropdown-toggle').click(function(e) {
+            e.stopPropagation();
+            $(this).siblings('.dropdown-menu').toggleClass('show');
+        });
+        
+        // Close dropdown when clicking elsewhere
+        $(document).click(function() {
+            $('.dropdown-menu').removeClass('show');
+        });
+        
+        // Status change buttons (publish, draft)
+        $('.publish-btn').click(function() {
+            const articleId = $(this).data('id');
+            changeArticleStatus(articleId, 'published');
+        });
+        
+        $('.draft-btn').click(function() {
+            const articleId = $(this).data('id');
+            changeArticleStatus(articleId, 'draft');
+        });
+        
+        // Feature/Unfeature buttons
+        $('.feature-btn').click(function() {
+            const articleId = $(this).data('id');
+            toggleArticleFeature(articleId, true);
+        });
+        
+        $('.unfeature-btn').click(function() {
+            const articleId = $(this).data('id');
+            toggleArticleFeature(articleId, false);
+        });
+        
+        // Helper functions
+        function changeArticleStatus(articleId, status) {
+            $.ajax({
+                url: '/admin/articles/change-status',
+                type: 'POST',
+                data: {
+                    article_id: articleId,
+                    status: status
+                },
+                success: function(response) {
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while processing your request.');
+                }
+            });
+        }
+        
+        function toggleArticleFeature(articleId, featured) {
+            $.ajax({
+                url: '/admin/articles/toggle-feature',
+                type: 'POST',
+                data: {
+                    article_id: articleId,
+                    featured: featured
+                },
+                success: function(response) {
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while processing your request.');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

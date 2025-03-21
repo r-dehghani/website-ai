@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | My Personal Website{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-header">
+            <h1>Edit Profile</h1>
+        </div>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="edit-profile-container">
+            <form class="edit-profile-form" action="/profile/edit" method="post" enctype="multipart/form-data">
+                <div class="form-section">
+                    <h2>Personal Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" value="{{ user.name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" value="{{ user.email }}" disabled>
+                        <small class="form-text">Email cannot be changed. Contact an administrator if you need to update your email.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea id="bio" name="bio" rows="5">{{ user.bio }}</textarea>
+                        <small class="form-text">Share a little about yourself. This will be displayed on your profile and with your comments.</small>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Profile Picture</h2>
+                    
+                    <div class="avatar-edit">
+                        <div class="current-avatar">
+                            <img src="{{ user.avatar }}" alt="{{ user.name }}" class="preview-avatar">
+                        </div>
+                        
+                        <div class="avatar-upload">
+                            <label for="avatar">Upload New Picture</label>
+                            <input type="file" id="avatar" name="avatar" accept="image/*">
+                            <small class="form-text">Maximum file size: 2MB. Supported formats: JPG, PNG, GIF.</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Social Links</h2>
+                    
+                    <div class="form-group">
+                        <label for="website">Website</label>
+                        <input type="url" id="website" name="website" value="{{ user.website }}">
+                        <small class="form-text">Your personal or professional website.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="github">GitHub</label>
+                        <input type="url" id="github" name="github" value="{{ user.github }}">
+                        <small class="form-text">Your GitHub profile URL.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="twitter">Twitter</label>
+                        <input type="url" id="twitter" name="twitter" value="{{ user.twitter }}">
+                        <small class="form-text">Your Twitter profile URL.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn</label>
+                        <input type="url" id="linkedin" name="linkedin" value="{{ user.linkedin }}">
+                        <small class="form-text">Your LinkedIn profile URL.</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="/profile" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview avatar image before upload
+    document.getElementById('avatar').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.querySelector('.preview-avatar').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

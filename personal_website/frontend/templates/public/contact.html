@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Contact | My Personal Website{% endblock %}
+
+{% block content %}
+<section class="contact-hero">
+    <div class="contact-hero-content">
+        <h1>Get in Touch</h1>
+        <p class="subtitle">Have a question or want to work together? Send me a message!</p>
+    </div>
+</section>
+
+<section class="contact-section">
+    <div class="container">
+        <div class="contact-wrapper">
+            <div class="contact-info">
+                <h2>Contact Information</h2>
+                <p>Feel free to reach out to me using the form or through any of the channels below.</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <i class="icon-email"></i>
+                        <div class="contact-text">
+                            <h3>Email</h3>
+                            <p><a href="mailto:{{ settings.email|default('info@example.com') }}">{{ settings.email|default('info@example.com') }}</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="icon-location"></i>
+                        <div class="contact-text">
+                            <h3>Location</h3>
+                            <p>{{ settings.location|default('New York, NY') }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="icon-globe"></i>
+                        <div class="contact-text">
+                            <h3>Website</h3>
+                            <p><a href="{{ settings.website|default('#') }}" target="_blank">{{ settings.website|default('www.example.com') }}</a></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="social-links">
+                    {% if settings.github_url %}
+                    <a href="{{ settings.github_url }}" aria-label="GitHub" target="_blank"><i class="icon-github"></i></a>
+                    {% endif %}
+                    
+                    {% if settings.linkedin_url %}
+                    <a href="{{ settings.linkedin_url }}" aria-label="LinkedIn" target="_blank"><i class="icon-linkedin"></i></a>
+                    {% endif %}
+                    
+                    {% if settings.twitter_url %}
+                    <a href="{{ settings.twitter_url }}" aria-label="Twitter" target="_blank"><i class="icon-twitter"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="contact-form-container">
+                <h2>Send a Message</h2>
+                
+                {% if success %}
+                <div class="alert alert-success">
+                    {{ success }}
+                </div>
+                {% endif %}
+                
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                <form class="contact-form" action="/contact" method="post">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" name="name" required value="{{ form.name|default('') }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Your Email</label>
+                        <input type="email" id="email" name="email" required value="{{ form.email|default('') }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" required value="{{ form.subject|default('') }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required>{{ form.message|default('') }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

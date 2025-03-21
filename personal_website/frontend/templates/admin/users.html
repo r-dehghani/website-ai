@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}User Management | Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    {% include 'admin/sidebar.html' %}
+    
+    <div class="admin-content">
+        <div class="admin-header">
+            <div class="breadcrumb">
+                <a href="/admin/dashboard">Dashboard</a>
+                <span>/</span>
+                <a href="/admin/users">Users</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="/admin/users/create" class="btn btn-primary">
+                    <i class="icon-add-user"></i> Add User
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-main">
+            <div class="content-header">
+                <h1>User Management</h1>
+                <p>Manage user accounts, roles, and permissions.</p>
+            </div>
+            
+            {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.type }}">
+                    {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="filter-tools">
+                <div class="search-box">
+                    <form action="/admin/users" method="get">
+                        <input type="text" name="search" placeholder="Search users..." value="{{ search }}">
+                        <button type="submit" class="search-btn"><i class="icon-search"></i></button>
+                    </form>
+                </div>
+                
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <label for="role-filter">Role:</label>
+                        <select id="role-filter" name="role" onchange="this.form.submit()">
+                            <option value="">All Roles</option>
+                            <option value="admin" {% if role == 'admin' %}selected{% endif %}>Admin</option>
+                            <option value="contributor" {% if role == 'contributor' %}selected{% endif %}>Contributor</option>
+                            <option value="viewer" {% if role == 'viewer' %}selected{% endif %}>Viewer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status-filter">Status:</label>
+                        <select id="status-filter" name="status" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bulk-actions">
+                <div class="select-all-container">
+                    <input type="checkbox" id="select-all" class="select-all">
+                    <label for="select-all">Select All</label>
+                </div>
+                
+                <div class="bulk-actions-options">
+                    <select id="bulk-action">
+                        <option value="">Bulk Actions</option>
+                        <option value="activate">Activate</option>
+                        <option value="deactivate">Deactivate</option>
+                        <option value="delete">Delete</option>
+                        <option value="change-role">Change Role</option>
+                    </select>
+                    
+                    <button type="button" id="apply-bulk-action" class="btn btn-secondary">Apply</button>
+                </div>
+            </div>
+            
+            <div class="data-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <input type="checkbox" class="select-all-checkbox">
+                            </th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Last Login</th>
+                            <th class="actions-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="row-checkbox" data-id="{{ user.id }}">
+                            </td>
+                            <td class="user-info">
+                                <img src="{{ user.avatar }}" alt="{{ user.name }}" class="user-avatar-small">
+                                <span>{{ user.name }}</span>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <select class="role-select" data-id="{{ user.id }}" data-original-value="{{ user.role }}">
+                                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                                    <option value="contributor" {% if user.role == 'contributor' %}selected{% endif %}>Contributor</option>
+                                    <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %}>Viewer</option>
+                                </select>
+                            </td>
+                            <td>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="status-toggle" data-id="{{ user.id }}" {% if user.is_active %}checked{% endif %}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </td>
+                            <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                            <td>{{ user.last_login.strftime('%b %d, %Y') if user.last_login else 'Never' }}</td>
+                            <td class="actions">
+                                <a href="/admin/users/edit/{{ user.id }}" class="action-btn edit-btn" title="Edit">
+                                    <i class="icon-edit"></i>
+                                </a>
+                                {% if user.id != current_user.id %}
+                                <button class="action-btn delete-btn" data-id="{{ user.id }}" data-type="user" title="Delete">
+                                    <i class="icon-delete"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if pagination.pages > 1 %}
+            <div class="pagination">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('admin.users', page=pagination.prev_num, search=search, role=role, status=status) }}" class="pagination-prev">
+                    <i class="icon-arrow-left"></i> Previous
+                </a>
+                {% endif %}
+                
+                <div class="pagination-pages">
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            {% if page != pagination.page %}
+                            <a href="{{ url_for('admin.users', page=page, search=search, role=role, status=status) }}" class="pagination-link">{{ page }}</a>
+                            {% else %}
+                            <span class="pagination-link current">{{ page }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="pagination-ellipsis">...</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if pagination.has_next %}
+                <a href="{{ url_for('admin.users', page=pagination.next_num, search=search, role=role, status=status) }}" class="pagination-next">
+                    Next <i class="icon-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Change Role Modal -->
+<div class="modal" id="changeRoleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changeRoleForm" action="/admin/users/change-role" method="post">
+                    <input type="hidden" name="user_ids" id="selectedUserIds">
+                    
+                    <div class="form-group">
+                        <label for="new-role">Select New Role:</label>
+                        <select id="new-role" name="new_role" class="form-control" required>
+                            <option value="admin">Admin</option>
+                            <option value="contributor">Contributor</option>
+                            <option value="viewer">Viewer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the selected user(s)? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" action="/admin/users/delete" method="post">
+                    <input type="hidden" name="user_ids" id="deleteUserIds">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,75 @@
+<div class="admin-sidebar">
+    <div class="sidebar-header">
+        <h2>Admin Panel</h2>
+    </div>
+    
+    <div class="user-info">
+        <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" class="user-avatar">
+        <div class="user-details">
+            <h3>{{ current_user.name }}</h3>
+            <span class="user-role">Administrator</span>
+        </div>
+    </div>
+    
+    <nav class="admin-nav">
+        <div class="nav-group">
+            <div class="nav-group-title">Content</div>
+            <ul>
+                <li {% if request.path == '/admin/dashboard' %}class="active"{% endif %}>
+                    <a href="/admin/dashboard"><i class="icon-dashboard"></i> Dashboard</a>
+                </li>
+                <li {% if request.path == '/admin/articles' %}class="active"{% endif %}>
+                    <a href="/admin/articles"><i class="icon-articles"></i> Articles</a>
+                </li>
+                <li {% if request.path == '/admin/categories' %}class="active"{% endif %}>
+                    <a href="/admin/categories"><i class="icon-category"></i> Categories</a>
+                </li>
+                <li {% if request.path == '/admin/comments' %}class="active"{% endif %}>
+                    <a href="/admin/comments"><i class="icon-comment"></i> Comments</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Users</div>
+            <ul>
+                <li {% if request.path == '/admin/users' %}class="active"{% endif %}>
+                    <a href="/admin/users"><i class="icon-users"></i> All Users</a>
+                </li>
+                <li {% if request.path == '/admin/contributors' %}class="active"{% endif %}>
+                    <a href="/admin/contributors"><i class="icon-contributor"></i> Contributors</a>
+                </li>
+                <li {% if request.path == '/admin/admins' %}class="active"{% endif %}>
+                    <a href="/admin/admins"><i class="icon-admin"></i> Administrators</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Website</div>
+            <ul>
+                <li {% if request.path == '/admin/settings' %}class="active"{% endif %}>
+                    <a href="/admin/settings"><i class="icon-settings"></i> Settings</a>
+                </li>
+                <li {% if request.path == '/admin/appearance' %}class="active"{% endif %}>
+                    <a href="/admin/appearance"><i class="icon-appearance"></i> Appearance</a>
+                </li>
+                <li {% if request.path == '/admin/menus' %}class="active"{% endif %}>
+                    <a href="/admin/menus"><i class="icon-menu"></i> Menus</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-title">Advanced</div>
+            <ul>
+                <li {% if request.path == '/admin/backups' %}class="active"{% endif %}>
+                    <a href="/admin/backups"><i class="icon-backup"></i> Backups</a>
+                </li>
+                <li {% if request.path == '/admin/logs' %}class="active"{% endif %}>
+                    <a href="/admin/logs"><i class="icon-log"></i> Logs</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>

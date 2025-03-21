@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Register | My Personal Website{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>Create an Account</h1>
+                <p>Join our community to read, comment and contribute.</p>
+            </div>
+            
+            {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form class="auth-form" action="/register" method="post">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <small class="form-text">Password must be at least 8 characters long and include a number and special character.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                
+                <div class="form-options">
+                    <div class="agree-terms">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            </form>
+            
+            <div class="auth-divider">
+                <span>OR</span>
+            </div>
+            
+            <div class="social-auth">
+                <button class="btn btn-social btn-google">
+                    <i class="icon-google"></i> Register with Google
+                </button>
+                <button class="btn btn-social btn-github">
+                    <i class="icon-github"></i> Register with GitHub
+                </button>
+            </div>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login">Login</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

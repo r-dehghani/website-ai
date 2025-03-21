@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to My Personal Website{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Welcome to My Personal Space</h1>
+        <p class="subtitle">Developer, Writer, and Tech Enthusiast</p>
+        <div class="hero-buttons">
+            <a href="/about" class="btn btn-primary">About Me</a>
+            <a href="/articles" class="btn btn-secondary">Read My Articles</a>
+        </div>
+    </div>
+</section>
+
+<section class="featured-content">
+    <div class="section-header">
+        <h2>Featured Articles</h2>
+        <p>Explore my latest thoughts and insights</p>
+    </div>
+    
+    <div class="articles-grid">
+        {% for article in featured_articles %}
+        <article class="article-card">
+            <div class="article-image">
+                <img src="{{ article.image_url }}" alt="{{ article.title }}">
+            </div>
+            <div class="article-content">
+                <span class="article-category">{{ article.category }}</span>
+                <h3><a href="/articles/{{ article.slug }}">{{ article.title }}</a></h3>
+                <p class="article-excerpt">{{ article.excerpt }}</p>
+                <div class="article-meta">
+                    <span class="date">{{ article.published_date }}</span>
+                    <span class="read-time">{{ article.read_time }} min read</span>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    
+    <div class="view-all">
+        <a href="/articles" class="btn btn-outline">View All Articles</a>
+    </div>
+</section>
+
+<section class="about-preview">
+    <div class="about-content">
+        <h2>A Bit About Me</h2>
+        <p>Hello! I'm a passionate developer and writer with expertise in web development, AI, and data science. I love creating user-friendly applications and sharing my knowledge through articles and tutorials.</p>
+        <a href="/about" class="btn btn-text">Learn more about me <span class="icon-arrow-right"></span></a>
+    </div>
+    <div class="about-image">
+        <img src="{{ url_for('static', filename='assets/images/profile.jpg') }}" alt="My Profile Picture">
+    </div>
+</section>
+
+<section class="newsletter">
+    <div class="newsletter-content">
+        <h2>Stay Updated</h2>
+        <p>Subscribe to my newsletter to receive updates on my latest articles and projects.</p>
+        <form class="newsletter-form" action="/subscribe" method="post">
+            <input type="email" name="email" placeholder="Your email address" required>
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

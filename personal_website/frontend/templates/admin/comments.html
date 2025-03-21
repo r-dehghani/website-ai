@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Comments Management | Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    {% include 'admin/sidebar.html' %}
+    
+    <div class="admin-content">
+        <div class="admin-header">
+            <div class="breadcrumb">
+                <a href="/admin/dashboard">Dashboard</a>
+                <span>/</span>
+                <a href="/admin/comments">Comments</a>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn btn-primary btn-refresh">
+                    <i class="icon-refresh"></i> Refresh
+                </button>
+            </div>
+        </div>
+        
+        <div class="admin-main">
+            <div class="content-header">
+                <h1>Comments Management</h1>
+                <p>Review, approve, and manage comments from your readers.</p>
+            </div>
+            
+            {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.type }}">
+                    {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="filter-tools">
+                <div class="search-box">
+                    <form action="/admin/comments" method="get">
+                        <input type="text" name="search" placeholder="Search comments..." value="{{ search }}">
+                        <button type="submit" class="search-btn"><i class="icon-search"></i></button>
+                    </form>
+                </div>
+                
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <label for="status-filter">Status:</label>
+                        <select id="status-filter" name="status" onchange="this.form.submit()">
+                            <option value="">All Comments</option>
+                            <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="spam" {% if status == 'spam' %}selected{% endif %}>Spam</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="article-filter">Article:</label>
+                        <select id="article-filter" name="article_id" onchange="this.form.submit()">
+                            <option value="">All Articles</option>
+                            {% for article in articles %}
+                            <option value="{{ article.id }}" {% if article_id == article.id %}selected{% endif %}>{{ article.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bulk-actions">
+                <div class="select-all-container">
+                    <input type="checkbox" id="select-all" class="select-all">
+                    <label for="select-all">Select All</label>
+                </div>
+                
+                <div class="bulk-actions-options">
+                    <select id="bulk-action">
+                        <option value="">Bulk Actions</option>
+                        <option value="approve">Approve</option>
+                        <option value="unapprove">Unapprove</option>
+                        <option value="mark-spam">Mark as Spam</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    
+                    <button type="button" id="apply-bulk-action" class="btn btn-secondary">Apply</button>
+                </div>
+            </div>
+            
+            <div class="comments-container">
+                {% for comment in comments %}
+                <div class="comment-item">
+                    <div class="comment-checkbox">
+                        <input type="checkbox" class="row-checkbox" data-id="{{ comment.id }}">
+                    </div>
+                    
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <img src="{{ comment.user.avatar }}" alt="{{ comment.user.name }}" class="commenter-avatar">
+                            <div class="comment-meta">
+                                <span class="commenter-name">{{ comment.user.name }}</span>
+                                <span class="comment-date">{{ comment.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
+                                <span class="comment-article">on <a href="/articles/{{ comment.article.slug }}">{{ comment.article.title }}</a></span>
+                                <span class="comment-status status-{{ comment.status }}">{{ comment.status|title }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="comment-body">
+                            <p>{{ comment.content }}</p>
+                        </div>
+                        
+                        <div class="comment-actions">
+                            {% if comment.status == 'pending' %}
+                            <button class="btn-text approve-btn" data-id="{{ comment.id }}">
+                                <i class="icon-check"></i> Approve
+                            </button>
+                            {% elif comment.status == 'approved' %}
+                            <button class="btn-text unapprove-btn" data-id="{{ comment.id }}">
+                                <i class="icon-close"></i> Unapprove
+                            </button>
+                            {% endif %}
+                            
+                            <button class="btn-text spam-btn" data-id="{{ comment.id }}">
+                                <i class="icon-spam"></i> Spam
+                            </button>
+                            
+                            <button class="btn-text reply-btn" data-id="{{ comment.id }}">
+                                <i class="icon-reply"></i> Reply
+                            </button>
+                            
+                            <button class="btn-text edit-btn" data-id="{{ comment.id }}">
+                                <i class="icon-edit"></i> Edit
+                            </button>
+                            
+                            <button class="btn-text delete-btn" data-id="{{ comment.id }}" data-type="comment">
+                                <i class="icon-delete"></i> Delete
+                            </button>
+                        </div>
+                        
+                        <!-- Reply Form (Initially Hidden) -->
+                        <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                            <form action="/admin/comments/reply/{{ comment.id }}" method="post">
+                                <textarea name="reply_content" rows="3" placeholder="Write your reply here..."></textarea>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Submit Reply</button>
+                                    <button type="button" class="btn btn-secondary cancel-reply">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Edit Form (Initially Hidden) -->
+                        <div class="edit-form" id="edit-form-{{ comment.id }}" style="display: none;">
+                            <form action="/admin/comments/edit/{{ comment.id }}" method="post">
+                                <textarea name="comment_content" rows="3">{{ comment.content }}</textarea>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Update Comment</button>
+                                    <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        {% if comment.replies %}
+                        <div class="comment-replies">
+                            <h4>Replies</h4>
+                            {% for reply in comment.replies %}
+                            <div class="reply-item">
+                                <div class="reply-header">
+                                    <img src="{{ reply.user.avatar }}" alt="{{ reply.user.name }}" class="commenter-avatar small">
+                                    <div class="reply-meta">
+                                        <span class="commenter-name">{{ reply.user.name }}</span>
+                                        <span class="comment-date">{{ reply.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="reply-body">
+                                    <p>{{ reply.content }}</p>
+                                </div>
+                                
+                                <div class="reply-actions">
+                                    <button class="btn-text edit-btn" data-id="{{ reply.id }}">
+                                        <i class="icon-edit"></i> Edit
+                                    </button>
+                                    
+                                    <button class="btn-text delete-btn" data-id="{{ reply.id }}" data-type="reply">
+                                        <i class="icon-delete"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not comments %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="icon-comment"></i>
+                    </div>
+                    <h3>No Comments Found</h3>
+                    <p>There are no comments matching your criteria.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if pagination.pages > 1 %}
+            <div class="pagination">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('admin.comments', page=pagination.prev_num, search=search, status=status, article_id=article_id) }}" class="pagination-prev">
+                    <i class="icon-arrow-left"></i> Previous
+                </a>
+                {% endif %}
+                
+                <div class="pagination-pages">
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            {% if page != pagination.page %}
+                            <a href="{{ url_for('admin.comments', page=page, search=search, status=status, article_id=article_id) }}" class="pagination-link">{{ page }}</a>
+                            {% else %}
+                            <span class="pagination-link current">{{ page }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="pagination-ellipsis">...</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if pagination.has_next %}
+                <a href="{{ url_for('admin.comments', page=pagination.next_num, search=search, status=status, article_id=article_id) }}" class="pagination-next">
+                    Next <i class="icon-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the selected comment(s)? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" action="/admin/comments/delete" method="post">
+                    <input type="hidden" name="comment_ids" id="deleteCommentIds">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Toggle reply form
+        $('.reply-btn').click(function() {
+            const commentId = $(this).data('id');
+            $('#reply-form-' + commentId).toggle();
+        });
+        
+        // Toggle edit form
+        $('.edit-btn').click(function() {
+            const commentId = $(this).data('id');
+            $('#edit-form-' + commentId).toggle();
+        });
+        
+        // Cancel reply
+        $('.cancel-reply').click(function() {
+            $(this).closest('.reply-form').hide();
+        });
+        
+        // Cancel edit
+        $('.cancel-edit').click(function() {
+            $(this).closest('.edit-form').hide();
+        });
+    });
+</script>
+{% endblock %}

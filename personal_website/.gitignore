@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Flask
+instance/
+.webassets-cache
+.env
+.flaskenv
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Database
+*.sqlite
+*.db
+*.db-journal
+
+# IDE and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Static files
+frontend/static/uploads/
+
+# Logs
+logs/
+*.log
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Distribution
+dist/
+build/
+
+# Docker
+.dockerignore
+
+# Compiled CSS
+*.min.css
+
+# Compiled JavaScript
+*.min.js
+
+# Cache
+.cache/

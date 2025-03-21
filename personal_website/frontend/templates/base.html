@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Personal Website{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    {% block extra_css %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    {% block extra_js %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="/">My Personal Website</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Me</a></li>
+                    <li><a href="/articles">Articles</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <div class="auth-links">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.role == 'admin' %}
+                                <li><a href="/admin/dashboard">Admin Panel</a></li>
+                            {% elif current_user.role == 'contributor' %}
+                                <li><a href="/contributor/dashboard">Contributor Panel</a></li>
+                            {% endif %}
+                            <li><a href="/profile">Profile</a></li>
+                            <li><a href="/logout">Logout</a></li>
+                        {% else %}
+                            <li><a href="/login">Login</a></li>
+                            <li><a href="/register">Register</a></li>
+                        {% endif %}
+                    </div>
+                </ul>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>My Personal Website</h3>
+                    <p>Share knowledge, connect with others, and showcase my skills.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About Me</a></li>
+                        <li><a href="/articles">Articles</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-links">
+                        <a href="#" aria-label="GitHub"><i class="icon-github"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="icon-linkedin"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="icon-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; {% now 'Y' %} My Personal Website. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

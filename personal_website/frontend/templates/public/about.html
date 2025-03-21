@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}About Me | My Personal Website{% endblock %}
+
+{% block content %}
+<section class="about-hero">
+    <div class="about-hero-content">
+        <h1>About Me</h1>
+        <p class="subtitle">Get to know who I am and what I do</p>
+    </div>
+</section>
+
+<section class="about-intro">
+    <div class="about-image">
+        <img src="{{ url_for('static', filename='assets/images/profile-large.jpg') }}" alt="My Profile Picture">
+    </div>
+    <div class="about-bio">
+        <h2>Hi, I'm [Your Name]</h2>
+        <p class="lead">I'm a passionate developer, writer, and tech enthusiast based in [Your Location].</p>
+        <p>With over [X] years of experience in the tech industry, I've worked on a variety of projects ranging from web development to machine learning applications. My passion lies in creating user-friendly solutions and sharing knowledge with the community.</p>
+        <p>When I'm not coding or writing, you can find me hiking, reading sci-fi novels, or experimenting with new technologies.</p>
+        <div class="social-links">
+            <a href="#" class="social-link" aria-label="GitHub"><i class="icon-github"></i> GitHub</a>
+            <a href="#" class="social-link" aria-label="LinkedIn"><i class="icon-linkedin"></i> LinkedIn</a>
+            <a href="#" class="social-link" aria-label="Twitter"><i class="icon-twitter"></i> Twitter</a>
+        </div>
+    </div>
+</section>
+
+<section class="skills">
+    <div class="section-header">
+        <h2>My Skills</h2>
+        <p>Technologies and tools I work with</p>
+    </div>
+    <div class="skills-grid">
+        <div class="skill-category">
+            <h3>Front-end Development</h3>
+            <ul class="skill-list">
+                <li>HTML5 & CSS3</li>
+                <li>JavaScript (ES6+)</li>
+                <li>React / Vue.js</li>
+                <li>Responsive Design</li>
+                <li>SASS/SCSS</li>
+            </ul>
+        </div>
+        <div class="skill-category">
+            <h3>Back-end Development</h3>
+            <ul class="skill-list">
+                <li>Python</li>
+                <li>Node.js</li>
+                <li>Flask / Django</li>
+                <li>RESTful APIs</li>
+                <li>SQL & NoSQL Databases</li>
+            </ul>
+        </div>
+        <div class="skill-category">
+            <h3>Other Skills</h3>
+            <ul class="skill-list">
+                <li>Git & Version Control</li>
+                <li>Docker</li>
+                <li>CI/CD Pipelines</li>
+                <li>Test-Driven Development</li>
+                <li>Agile Methodologies</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="experience">
+    <div class="section-header">
+        <h2>Experience</h2>
+        <p>My professional journey</p>
+    </div>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-date">
+                <span>2022 - Present</span>
+            </div>
+            <div class="timeline-content">
+                <h3>Senior Developer</h3>
+                <p class="company">Company Name</p>
+                <p>Lead the development of web applications using modern frameworks. Collaborated with cross-functional teams to deliver high-quality software solutions.</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-date">
+                <span>2019 - 2022</span>
+            </div>
+            <div class="timeline-content">
+                <h3>Full-Stack Developer</h3>
+                <p class="company">Previous Company</p>
+                <p>Developed and maintained web applications. Implemented new features and optimized existing codebase for better performance.</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-date">
+                <span>2017 - 2019</span>
+            </div>
+            <div class="timeline-content">
+                <h3>Junior Developer</h3>
+                <p class="company">First Company</p>
+                <p>Started my professional journey as a junior developer. Gained experience in front-end and back-end technologies.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="education">
+    <div class="section-header">
+        <h2>Education</h2>
+    </div>
+    <div class="education-grid">
+        <div class="education-item">
+            <h3>Master's Degree in Computer Science</h3>
+            <p class="institution">University Name</p>
+            <p class="date">2015 - 2017</p>
+            <p>Specialized in Artificial Intelligence and Machine Learning</p>
+        </div>
+        <div class="education-item">
+            <h3>Bachelor's Degree in Software Engineering</h3>
+            <p class="institution">University Name</p>
+            <p class="date">2011 - 2015</p>
+            <p>Graduated with honors. Participated in various coding competitions.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="cta-content">
+        <h2>Interested in working together?</h2>
+        <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+        <a href="/contact" class="btn btn-primary">Get in Touch</a>
+    </div>
+</section>
+{% endblock %}

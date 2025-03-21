@@ -1,0 +1,1002 @@
+{% extends "base.html" %}
+
+{% block title %}Website Settings | Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    {% include 'admin/sidebar.html' %}
+    
+    <div class="admin-content">
+        <div class="admin-header">
+            <div class="breadcrumb">
+                <a href="/admin/dashboard">Dashboard</a>
+                <span>/</span>
+                <a href="/admin/settings">Settings</a>
+            </div>
+        </div>
+        
+        <div class="admin-main">
+            <div class="content-header">
+                <h1>Website Settings</h1>
+                <p>Configure your website settings and preferences.</p>
+            </div>
+            
+            {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.type }}">
+                    {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <ul class="settings-tabs">
+                        <li>
+                            <a href="#general-settings" class="settings-tab active" data-tab="general-settings">
+                                <i class="icon-settings"></i> General
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#profile-settings" class="settings-tab" data-tab="profile-settings">
+                                <i class="icon-user"></i> Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#appearance-settings" class="settings-tab" data-tab="appearance-settings">
+                                <i class="icon-appearance"></i> Appearance
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#email-settings" class="settings-tab" data-tab="email-settings">
+                                <i class="icon-email"></i> Email
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#social-settings" class="settings-tab" data-tab="social-settings">
+                                <i class="icon-social"></i> Social Media
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#seo-settings" class="settings-tab" data-tab="seo-settings">
+                                <i class="icon-seo"></i> SEO
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#security-settings" class="settings-tab" data-tab="security-settings">
+                                <i class="icon-security"></i> Security
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#advanced-settings" class="settings-tab" data-tab="advanced-settings">
+                                <i class="icon-advanced"></i> Advanced
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="settings-content">
+                    <!-- General Settings -->
+                    <div class="settings-panel active" id="general-settings">
+                        <div class="panel-header">
+                            <h2>General Settings</h2>
+                            <p>Configure basic website information and settings.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/general" method="post" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="site-title">Website Title</label>
+                                <input type="text" id="site-title" name="site_title" value="{{ settings.site_title }}" required>
+                                <span class="form-help">The title of your website that appears in browser tabs and search results.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="site-tagline">Tagline</label>
+                                <input type="text" id="site-tagline" name="site_tagline" value="{{ settings.site_tagline }}">
+                                <span class="form-help">A short description of your website that appears beside the title.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="site-description">Website Description</label>
+                                <textarea id="site-description" name="site_description" rows="3">{{ settings.site_description }}</textarea>
+                                <span class="form-help">A detailed description of your website for SEO purposes.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Website Logo</label>
+                                <div class="logo-preview">
+                                    {% if settings.site_logo %}
+                                    <img src="{{ settings.site_logo }}" alt="Website Logo" class="site-logo">
+                                    {% else %}
+                                    <div class="empty-logo">
+                                        <i class="icon-image"></i>
+                                        <span>No logo uploaded</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="file-upload">
+                                    <input type="file" id="site-logo" name="site_logo" accept="image/*">
+                                    <label for="site-logo" class="btn btn-outlined">Choose Logo</label>
+                                    {% if settings.site_logo %}
+                                    <button type="button" class="btn btn-danger remove-logo">Remove Logo</button>
+                                    {% endif %}
+                                </div>
+                                <span class="form-help">Recommended size: 200x50 pixels. Max file size: 2MB.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Favicon</label>
+                                <div class="favicon-preview">
+                                    {% if settings.favicon %}
+                                    <img src="{{ settings.favicon }}" alt="Favicon" class="site-favicon">
+                                    {% else %}
+                                    <div class="empty-favicon">
+                                        <i class="icon-image-small"></i>
+                                        <span>No favicon uploaded</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="file-upload">
+                                    <input type="file" id="site-favicon" name="favicon" accept="image/x-icon,image/png">
+                                    <label for="site-favicon" class="btn btn-outlined">Choose Favicon</label>
+                                    {% if settings.favicon %}
+                                    <button type="button" class="btn btn-danger remove-favicon">Remove Favicon</button>
+                                    {% endif %}
+                                </div>
+                                <span class="form-help">Recommended size: 32x32 pixels. Use .ico or .png format.</span>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="timezone">Timezone</label>
+                                    <select id="timezone" name="timezone">
+                                        {% for tz in timezones %}
+                                        <option value="{{ tz }}" {% if settings.timezone == tz %}selected{% endif %}>{{ tz }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group half">
+                                    <label for="date-format">Date Format</label>
+                                    <select id="date-format" name="date_format">
+                                        <option value="F j, Y" {% if settings.date_format == 'F j, Y' %}selected{% endif %}>{{ now.strftime('%B %d, %Y') }}</option>
+                                        <option value="Y-m-d" {% if settings.date_format == 'Y-m-d' %}selected{% endif %}>{{ now.strftime('%Y-%m-%d') }}</option>
+                                        <option value="m/d/Y" {% if settings.date_format == 'm/d/Y' %}selected{% endif %}>{{ now.strftime('%m/%d/%Y') }}</option>
+                                        <option value="d/m/Y" {% if settings.date_format == 'd/m/Y' %}selected{% endif %}>{{ now.strftime('%d/%m/%Y') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="articles-per-page">Articles Per Page</label>
+                                <input type="number" id="articles-per-page" name="articles_per_page" value="{{ settings.articles_per_page }}" min="1" max="50">
+                                <span class="form-help">Number of articles to display per page on the blog listing.</span>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Profile Settings -->
+                    <div class="settings-panel" id="profile-settings">
+                        <div class="panel-header">
+                            <h2>Profile Settings</h2>
+                            <p>Update your personal profile information.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/profile" method="post" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label>Profile Picture</label>
+                                <div class="avatar-preview">
+                                    <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}" class="user-avatar-large">
+                                </div>
+                                <div class="file-upload">
+                                    <input type="file" id="user-avatar" name="avatar" accept="image/*">
+                                    <label for="user-avatar" class="btn btn-outlined">Change Picture</label>
+                                </div>
+                                <span class="form-help">Recommended size: 250x250 pixels. Max file size: 2MB.</span>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="first-name">First Name</label>
+                                    <input type="text" id="first-name" name="first_name" value="{{ current_user.first_name }}" required>
+                                </div>
+                                
+                                <div class="form-group half">
+                                    <label for="last-name">Last Name</label>
+                                    <input type="text" id="last-name" name="last_name" value="{{ current_user.last_name }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="display-name">Display Name</label>
+                                <input type="text" id="display-name" name="display_name" value="{{ current_user.display_name }}" required>
+                                <span class="form-help">This name will be displayed publicly to users.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bio">Bio</label>
+                                <textarea id="bio" name="bio" rows="4">{{ current_user.bio }}</textarea>
+                                <span class="form-help">A brief description about yourself to display on your author page.</span>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                            </div>
+                        </form>
+                        
+                        <div class="form-divider"></div>
+                        
+                        <div class="panel-section">
+                            <h3>Change Password</h3>
+                            <form action="/admin/settings/change-password" method="post">
+                                <div class="form-group">
+                                    <label for="current-password">Current Password</label>
+                                    <input type="password" id="current-password" name="current_password" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="new-password">New Password</label>
+                                    <input type="password" id="new-password" name="new_password" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="confirm-password">Confirm New Password</label>
+                                    <input type="password" id="confirm-password" name="confirm_password" required>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Change Password</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Appearance Settings -->
+                    <div class="settings-panel" id="appearance-settings">
+                        <div class="panel-header">
+                            <h2>Appearance Settings</h2>
+                            <p>Customize the look and feel of your website.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/appearance" method="post">
+                            <div class="form-group">
+                                <label for="theme">Website Theme</label>
+                                <select id="theme" name="theme">
+                                    {% for theme in available_themes %}
+                                    <option value="{{ theme.id }}" {% if settings.theme == theme.id %}selected{% endif %}>{{ theme.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="theme-preview">
+                                <img src="{{ theme_preview_url }}" alt="Theme Preview" class="theme-preview-image">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="primary-color">Primary Color</label>
+                                <div class="color-selector">
+                                    <input type="color" id="primary-color" name="primary_color" value="{{ settings.primary_color }}">
+                                    <input type="text" class="color-hex" value="{{ settings.primary_color }}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="secondary-color">Secondary Color</label>
+                                <div class="color-selector">
+                                    <input type="color" id="secondary-color" name="secondary_color" value="{{ settings.secondary_color }}">
+                                    <input type="text" class="color-hex" value="{{ settings.secondary_color }}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="font-family">Font Family</label>
+                                <select id="font-family" name="font_family">
+                                    {% for font in available_fonts %}
+                                    <option value="{{ font.id }}" {% if settings.font_family == font.id %}selected{% endif %} style="font-family: '{{ font.name }}'">{{ font.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Homepage Layout</label>
+                                <div class="layout-options">
+                                    <div class="layout-option {% if settings.homepage_layout == 'standard' %}selected{% endif %}">
+                                        <input type="radio" id="layout-standard" name="homepage_layout" value="standard" {% if settings.homepage_layout == 'standard' %}checked{% endif %}>
+                                        <label for="layout-standard">
+                                            <div class="layout-preview standard-layout"></div>
+                                            <span>Standard</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="layout-option {% if settings.homepage_layout == 'grid' %}selected{% endif %}">
+                                        <input type="radio" id="layout-grid" name="homepage_layout" value="grid" {% if settings.homepage_layout == 'grid' %}checked{% endif %}>
+                                        <label for="layout-grid">
+                                            <div class="layout-preview grid-layout"></div>
+                                            <span>Grid</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="layout-option {% if settings.homepage_layout == 'magazine' %}selected{% endif %}">
+                                        <input type="radio" id="layout-magazine" name="homepage_layout" value="magazine" {% if settings.homepage_layout == 'magazine' %}checked{% endif %}>
+                                        <label for="layout-magazine">
+                                            <div class="layout-preview magazine-layout"></div>
+                                            <span>Magazine</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="custom-css">Custom CSS</label>
+                                <textarea id="custom-css" name="custom_css" rows="6" class="code-editor">{{ settings.custom_css }}</textarea>
+                                <span class="form-help">Add custom CSS styles to further customize your website appearance.</span>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary preview-changes">Preview</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Email Settings -->
+                    <div class="settings-panel" id="email-settings">
+                        <div class="panel-header">
+                            <h2>Email Settings</h2>
+                            <p>Configure email settings for notifications and newsletters.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/email" method="post">
+                            <div class="form-group">
+                                <label for="email-from">From Email</label>
+                                <input type="email" id="email-from" name="email_from" value="{{ settings.email_from }}" required>
+                                <span class="form-help">The email address that will be used as the sender for all system emails.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email-name">From Name</label>
+                                <input type="text" id="email-name" name="email_name" value="{{ settings.email_name }}" required>
+                                <span class="form-help">The name that will appear as the sender for all system emails.</span>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>SMTP Settings</h3>
+                                
+                                <div class="form-group">
+                                    <label for="smtp-host">SMTP Host</label>
+                                    <input type="text" id="smtp-host" name="smtp_host" value="{{ settings.smtp_host }}">
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label for="smtp-port">SMTP Port</label>
+                                        <input type="number" id="smtp-port" name="smtp_port" value="{{ settings.smtp_port }}">
+                                    </div>
+                                    
+                                    <div class="form-group half">
+                                        <label for="smtp-encryption">Encryption</label>
+                                        <select id="smtp-encryption" name="smtp_encryption">
+                                            <option value="none" {% if settings.smtp_encryption == 'none' %}selected{% endif %}>None</option>
+                                            <option value="ssl" {% if settings.smtp_encryption == 'ssl' %}selected{% endif %}>SSL</option>
+                                            <option value="tls" {% if settings.smtp_encryption == 'tls' %}selected{% endif %}>TLS</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="smtp-username">SMTP Username</label>
+                                    <input type="text" id="smtp-username" name="smtp_username" value="{{ settings.smtp_username }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="smtp-password">SMTP Password</label>
+                                    <input type="password" id="smtp-password" name="smtp_password" value="{{ settings.smtp_password }}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary test-email">Send Test Email</button>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>Email Notifications</h3>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="notify_new_comment" {% if settings.notify_new_comment %}checked{% endif %}>
+                                        <span>New comment notification</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="notify_new_user" {% if settings.notify_new_user %}checked{% endif %}>
+                                        <span>New user registration notification</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="notify_new_article" {% if settings.notify_new_article %}checked{% endif %}>
+                                        <span>New article publication notification</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Social Media Settings -->
+                    <div class="settings-panel" id="social-settings">
+                        <div class="panel-header">
+                            <h2>Social Media Settings</h2>
+                            <p>Configure your social media links and sharing options.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/social" method="post">
+                            <div class="panel-section">
+                                <h3>Social Media Links</h3>
+                                <p>Add your social media profile links to display on your website.</p>
+                                
+                                <div class="form-group">
+                                    <label for="facebook-url">
+                                        <i class="icon-facebook"></i> Facebook
+                                    </label>
+                                    <input type="url" id="facebook-url" name="facebook_url" value="{{ settings.facebook_url }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="twitter-url">
+                                        <i class="icon-twitter"></i> Twitter
+                                    </label>
+                                    <input type="url" id="twitter-url" name="twitter_url" value="{{ settings.twitter_url }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-url">
+                                        <i class="icon-instagram"></i> Instagram
+                                    </label>
+                                    <input type="url" id="instagram-url" name="instagram_url" value="{{ settings.instagram_url }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="linkedin-url">
+                                        <i class="icon-linkedin"></i> LinkedIn
+                                    </label>
+                                    <input type="url" id="linkedin-url" name="linkedin_url" value="{{ settings.linkedin_url }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="youtube-url">
+                                        <i class="icon-youtube"></i> YouTube
+                                    </label>
+                                    <input type="url" id="youtube-url" name="youtube_url" value="{{ settings.youtube_url }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="github-url">
+                                        <i class="icon-github"></i> GitHub
+                                    </label>
+                                    <input type="url" id="github-url" name="github_url" value="{{ settings.github_url }}">
+                                </div>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>Social Sharing</h3>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="enable_social_sharing" {% if settings.enable_social_sharing %}checked{% endif %}>
+                                        <span>Enable social sharing buttons on articles</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Sharing Platforms</label>
+                                    <div class="checkbox-grid">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="share_facebook" {% if settings.share_facebook %}checked{% endif %}>
+                                            <span>Facebook</span>
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="share_twitter" {% if settings.share_twitter %}checked{% endif %}>
+                                            <span>Twitter</span>
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="share_linkedin" {% if settings.share_linkedin %}checked{% endif %}>
+                                            <span>LinkedIn</span>
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="share_pinterest" {% if settings.share_pinterest %}checked{% endif %}>
+                                            <span>Pinterest</span>
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="share_reddit" {% if settings.share_reddit %}checked{% endif %}>
+                                            <span>Reddit</span>
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="share_email" {% if settings.share_email %}checked{% endif %}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="share-button-style">Share Button Style</label>
+                                    <select id="share-button-style" name="share_button_style">
+                                        <option value="icon-only" {% if settings.share_button_style == 'icon-only' %}selected{% endif %}>Icon Only</option>
+                                        <option value="icon-text" {% if settings.share_button_style == 'icon-text' %}selected{% endif %}>Icon + Text</option>
+                                        <option value="text-only" {% if settings.share_button_style == 'text-only' %}selected{% endif %}>Text Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="share-position">Share Button Position</label>
+                                    <select id="share-position" name="share_position">
+                                        <option value="top" {% if settings.share_position == 'top' %}selected{% endif %}>Top of Article</option>
+                                        <option value="bottom" {% if settings.share_position == 'bottom' %}selected{% endif %}>Bottom of Article</option>
+                                        <option value="both" {% if settings.share_position == 'both' %}selected{% endif %}>Top and Bottom</option>
+                                        <option value="floating" {% if settings.share_position == 'floating' %}selected{% endif %}>Floating Sidebar</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="session-timeout">Session Timeout (minutes)</label>
+                                <input type="number" id="session-timeout" name="session_timeout" value="{{ settings.session_timeout }}" min="5" max="1440">
+                                <span class="form-help">Time in minutes before an inactive session expires.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_captcha" {% if settings.enable_captcha %}checked{% endif %}>
+                                    <span>Enable CAPTCHA</span>
+                                </label>
+                                <span class="form-help">Add CAPTCHA verification to forms to prevent spam.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_login_notification" {% if settings.enable_login_notification %}checked{% endif %}>
+                                    <span>Login Notification</span>
+                                </label>
+                                <span class="form-help">Send email notifications for successful logins.</span>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- SEO Settings -->
+                    <div class="settings-panel" id="seo-settings">
+                        <div class="panel-header">
+                            <h2>SEO Settings</h2>
+                            <p>Configure search engine optimization settings for your website.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/seo" method="post">
+                            <div class="form-group">
+                                <label for="meta-keywords">Meta Keywords</label>
+                                <input type="text" id="meta-keywords" name="meta_keywords" value="{{ settings.meta_keywords }}">
+                                <span class="form-help">Comma-separated keywords relevant to your website for SEO.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="meta-description">Meta Description</label>
+                                <textarea id="meta-description" name="meta_description" rows="3">{{ settings.meta_description }}</textarea>
+                                <span class="form-help">A brief description of your website for search engines. Max 160 characters recommended.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_sitemap" {% if settings.enable_sitemap %}checked{% endif %}>
+                                    <span>Enable XML Sitemap</span>
+                                </label>
+                                <span class="form-help">Generates an XML sitemap to help search engines index your website.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_robots" {% if settings.enable_robots %}checked{% endif %}>
+                                    <span>Enable robots.txt</span>
+                                </label>
+                                <span class="form-help">Creates a robots.txt file to control search engine crawling.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="robots-content">Robots.txt Content</label>
+                                <textarea id="robots-content" name="robots_content" rows="6" class="code-editor">{{ settings.robots_content }}</textarea>
+                                <span class="form-help">Custom content for your robots.txt file. Leave empty for default.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="google-analytics">Google Analytics ID</label>
+                                <input type="text" id="google-analytics" name="google_analytics" value="{{ settings.google_analytics }}" placeholder="UA-XXXXXXXX-X or G-XXXXXXXXXX">
+                                <span class="form-help">Your Google Analytics tracking ID to enable website analytics.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="google-search-console">Google Search Console Verification</label>
+                                <input type="text" id="google-search-console" name="google_search_console" value="{{ settings.google_search_console }}">
+                                <span class="form-help">Google Search Console verification meta tag content.</span>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Advanced Settings -->
+                    <div class="settings-panel" id="advanced-settings">
+                        <div class="panel-header">
+                            <h2>Advanced Settings</h2>
+                            <p>Configure advanced website settings and optimizations.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/advanced" method="post">
+                            <div class="panel-section">
+                                <h3>Caching</h3>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="enable_cache" {% if settings.enable_cache %}checked{% endif %}>
+                                        <span>Enable Page Caching</span>
+                                    </label>
+                                    <span class="form-help">Cache pages to improve loading speed.</span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cache-lifetime">Cache Lifetime (minutes)</label>
+                                    <input type="number" id="cache-lifetime" name="cache_lifetime" value="{{ settings.cache_lifetime }}" min="5" max="1440">
+                                    <span class="form-help">Time in minutes before cached content expires.</span>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary clear-cache">Clear Cache</button>
+                                </div>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>Performance</h3>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="minify_html" {% if settings.minify_html %}checked{% endif %}>
+                                        <span>Minify HTML</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="minify_css" {% if settings.minify_css %}checked{% endif %}>
+                                        <span>Minify CSS</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="minify_js" {% if settings.minify_js %}checked{% endif %}>
+                                        <span>Minify JavaScript</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="lazy_loading" {% if settings.lazy_loading %}checked{% endif %}>
+                                        <span>Enable Lazy Loading for Images</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>Maintenance Mode</h3>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="maintenance_mode" {% if settings.maintenance_mode %}checked{% endif %}>
+                                        <span>Enable Maintenance Mode</span>
+                                    </label>
+                                    <span class="form-help">Put your website in maintenance mode. Only administrators can access it.</span>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="maintenance-message">Maintenance Message</label>
+                                    <textarea id="maintenance-message" name="maintenance_message" rows="3">{{ settings.maintenance_message }}</textarea>
+                                    <span class="form-help">Message to display to visitors during maintenance mode.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>API Integration</h3>
+                                
+                                <div class="form-group">
+                                    <label for="api-key">API Key</label>
+                                    <div class="input-with-button">
+                                        <input type="text" id="api-key" value="{{ settings.api_key }}" readonly>
+                                        <button type="button" class="btn btn-secondary regenerate-api-key">Regenerate</button>
+                                    </div>
+                                    <span class="form-help">API key for external integrations.</span>
+                                </div>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="enable_api" {% if settings.enable_api %}checked{% endif %}>
+                                        <span>Enable API Access</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="panel-section">
+                                <h3>Database</h3>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary backup-database">Backup Database</button>
+                                    <button type="button" class="btn btn-secondary optimize-database">Optimize Database</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Security Settings -->
+                    <div class="settings-panel" id="security-settings">
+                        <div class="panel-header">
+                            <h2>Security Settings</h2>
+                            <p>Configure security options for your website.</p>
+                        </div>
+                        
+                        <form action="/admin/settings/security" method="post">
+                            <div class="form-group">
+                                <label for="login-attempts">Max Login Attempts</label>
+                                <input type="number" id="login-attempts" name="max_login_attempts" value="{{ settings.max_login_attempts }}" min="1" max="10">
+                                <span class="form-help">Maximum number of failed login attempts before account lockout.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="lockout-time">Account Lockout Time (minutes)</label>
+                                <input type="number" id="lockout-time" name="account_lockout_time" value="{{ settings.account_lockout_time }}" min="5" max="1440">
+                                <span class="form-help">Time in minutes an account is locked after too many failed login attempts.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_2fa" {% if settings.enable_2fa %}checked{% endif %}>
+                                    <span>Enable Two-Factor Authentication</span>
+                                </label>
+                                <span class="form-help">Require two-factor authentication for user login.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="force_ssl" {% if settings.force_ssl %}checked{% endif %}>
+                                    <span>Force SSL</span>
+                                </label>
+                                <span class="form-help">Require HTTPS for all website access.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password-policy">Password Policy</label>
+                                <select id="password-policy" name="password_policy">
+                                    <option value="low" {% if settings.password_policy == 'low' %}selected{% endif %}>Low Security (min 6 characters)</option>
+                                    <option value="medium" {% if settings.password_policy == 'medium' %}selected{% endif %}>Medium Security (min 8 characters, letters + numbers)</option>
+                                    <option value="high" {% if settings.password_policy == 'high' %}selected{% endif %}>High Security (min 10 chars, mixed case + numbers + symbols)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="session-timeout">Session Timeout (minutes)</label>
+                                <input type="number" id="session-timeout" name="session_timeout" value="{{ settings.session_timeout }}" min="5" max="1440">
+                                <span class="form-help">Time in minutes before an inactive session expires.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_captcha" {% if settings.enable_captcha %}checked{% endif %}>
+                                    <span>Enable CAPTCHA</span>
+                                </label>
+                                <span class="form-help">Add CAPTCHA verification to forms to prevent spam.</span>
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_login_notification" {% if settings.enable_login_notification %}checked{% endif %}>
+                                    <span>Login Notification</span>
+                                </label>
+                                <span class="form-help">Send email notifications for successful logins.</span>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Settings tab navigation
+        $('.settings-tab').click(function(e) {
+            e.preventDefault();
+            const tabId = $(this).data('tab');
+            
+            // Update active tab
+            $('.settings-tab').removeClass('active');
+            $(this).addClass('active');
+            
+            // Show selected panel
+            $('.settings-panel').removeClass('active');
+            $('#' + tabId).addClass('active');
+            
+            // Update URL hash
+            window.location.hash = tabId;
+        });
+        
+        // Check for hash in URL
+        if (window.location.hash) {
+            const tabId = window.location.hash.substring(1);
+            $('.settings-tab[data-tab="' + tabId + '"]').click();
+        }
+        
+        // Color picker sync with hex value
+        $('.color-selector input[type="color"]').on('input', function() {
+            $(this).siblings('.color-hex').val($(this).val());
+        });
+        
+        $('.color-hex').on('input', function() {
+            $(this).siblings('input[type="color"]').val($(this).val());
+        });
+        
+        // File upload interactions
+        $('.file-upload input[type="file"]').change(function() {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                $(this).siblings('label').text(fileName);
+            } else {
+                $(this).siblings('label').text('Choose File');
+            }
+        });
+        
+        // Remove logo/favicon buttons
+        $('.remove-logo').click(function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to remove the logo?')) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'remove_logo',
+                    value: '1'
+                }).appendTo('form');
+                $(this).closest('form').submit();
+            }
+        });
+        
+        $('.remove-favicon').click(function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to remove the favicon?')) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'remove_favicon',
+                    value: '1'
+                }).appendTo('form');
+                $(this).closest('form').submit();
+            }
+        });
+        
+        // Send test email
+        $('.test-email').click(function() {
+            $.ajax({
+                url: '/admin/settings/test-email',
+                type: 'POST',
+                success: function(response) {
+                    alert('Test email sent successfully!');
+                },
+                error: function() {
+                    alert('Failed to send test email. Please check your SMTP settings.');
+                }
+            });
+        });
+        
+        // Clear cache button
+        $('.clear-cache').click(function() {
+            $.ajax({
+                url: '/admin/settings/clear-cache',
+                type: 'POST',
+                success: function(response) {
+                    alert('Cache cleared successfully!');
+                },
+                error: function() {
+                    alert('Failed to clear cache.');
+                }
+            });
+        });
+        
+        // Database actions
+        $('.backup-database').click(function() {
+            window.location.href = '/admin/settings/backup-database';
+        });
+        
+        $('.optimize-database').click(function() {
+            $.ajax({
+                url: '/admin/settings/optimize-database',
+                type: 'POST',
+                success: function(response) {
+                    alert('Database optimized successfully!');
+                },
+                error: function() {
+                    alert('Failed to optimize database.');
+                }
+            });
+        });
+        
+        // Regenerate API key
+        $('.regenerate-api-key').click(function() {
+            if (confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
+                $.ajax({
+                    url: '/admin/settings/regenerate-api-key',
+                    type: 'POST',
+                    success: function(response) {
+                        $('#api-key').val(response.api_key);
+                        alert('API key regenerated successfully!');
+                    },
+                    error: function() {
+                        alert('Failed to regenerate API key.');
+                    }
+                });
+            }
+        });
+        
+        // Preview changes button
+        $('.preview-changes').click(function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData($(this).closest('form')[0]);
+            formData.append('preview', '1');
+            
+            $.ajax({
+                url: '/admin/settings/preview',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    window.open('/preview', '_blank');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

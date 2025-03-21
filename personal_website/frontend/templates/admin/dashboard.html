@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | My Personal Website{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    {% include 'admin/sidebar.html' %}
+    
+    <div class="admin-content">
+        <div class="admin-header">
+            <div class="breadcrumb">
+                <a href="/admin/dashboard">Dashboard</a>
+            </div>
+            
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" placeholder="Search...">
+                    <button class="search-btn"><i class="icon-search"></i></button>
+                </div>
+                
+                <div class="notification-dropdown">
+                    <button class="notification-btn">
+                        <i class="icon-notification"></i>
+                        {% if notifications %}
+                        <span class="notification-badge">{{ notifications|length }}</span>
+                        {% endif %}
+                    </button>
+                    <div class="dropdown-content">
+                        <div class="dropdown-header">
+                            <h3>Notifications</h3>
+                            <a href="/admin/notifications">View All</a>
+                        </div>
+                        
+                        <div class="notification-list">
+                            {% if notifications %}
+                                {% for notification in notifications %}
+                                <div class="notification-item {{ 'unread' if not notification.read }}">
+                                    <div class="notification-icon">
+                                        <i class="icon-{{ notification.type }}"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p>{{ notification.message }}</p>
+                                        <span class="notification-time">{{ notification.time }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-notification">
+                                    <p>No new notifications</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-main">
+            <div class="dashboard-welcome">
+                <h1>Welcome to the Admin Dashboard</h1>
+                <p>Manage your website content, users, and settings from here.</p>
+            </div>
+            
+            {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.type }}">
+                    {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon users-icon">
+                        <i class="icon-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ stats.total_users }}</span>
+                        <span class="stat-label">Total Users</span>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-change increase">
+                            <i class="icon-arrow-up"></i> {{ stats.new_users_percent }}%
+                        </span>
+                        <span class="stat-period">vs last month</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon articles-icon">
+                        <i class="icon-articles"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ stats.total_articles }}</span>
+                        <span class="stat-label">Articles</span>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-change {{ 'increase' if stats.articles_change > 0 else 'decrease' }}">
+                            <i class="icon-arrow-{{ 'up' if stats.articles_change > 0 else 'down' }}"></i> {{ stats.articles_change_percent }}%
+                        </span>
+                        <span class="stat-period">vs last month</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon views-icon">
+                        <i class="icon-view"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ stats.total_views }}</span>
+                        <span class="stat-label">Page Views</span>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-change {{ 'increase' if stats.views_change > 0 else 'decrease' }}">
+                            <i class="icon-arrow-{{ 'up' if stats.views_change > 0 else 'down' }}"></i> {{ stats.views_change_percent }}%
+                        </span>
+                        <span class="stat-period">vs last month</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon comments-icon">
+                        <i class="icon-comment"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number">{{ stats.total_comments }}</span>
+                        <span class="stat-label">Comments</span>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-change {{ 'increase' if stats.comments_change > 0 else 'decrease' }}">
+                            <i class="icon-arrow-{{ 'up' if stats.comments_change > 0 else 'down' }}"></i> {{ stats.comments_change_percent }}%
+                        </span>
+                        <span class="stat-period">vs last month</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-row">
+                <div class="dashboard-col">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>Recent Articles</h2>
+                            <a href="/admin/articles" class="view-all">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for article in recent_articles %}
+                                    <tr>
+                                        <td class="article-title">
+                                            <a href="/articles/{{ article.slug }}">{{ article.title }}</a>
+                                        </td>
+                                        <td>{{ article.author.name }}</td>
+                                        <td>
+                                            <span class="status-badge status-{{ article.status|lower }}">{{ article.status }}</span>
+                                        </td>
+                                        <td>{{ article.published_at or article.created_at }}</td>
+                                        <td class="actions">
+                                            <a href="/admin/articles/edit/{{ article.id }}" class="action-btn edit-btn" title="Edit">
+                                                <i class="icon-edit"></i>
+                                            </a>
+                                            <button class="action-btn delete-btn" data-id="{{ article.id }}" title="Delete">
+                                                <i class="icon-delete"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-col">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>Recent Users</h2>
+                            <a href="/admin/users" class="view-all">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Date Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in recent_users %}
+                                    <tr>
+                                        <td class="user-info">
+                                            <img src="{{ user.avatar }}" alt="{{ user.name }}" class="user-avatar-small">
+                                            <span>{{ user.name }}</span>
+                                        </td>
+                                        <td>{{ user.role|title }}</td>
+                                        <td>
+                                            <span class="status-badge status-{{ user.status|lower }}">{{ user.status|title }}</span>
+                                        </td>
+                                        <td>{{ user.created_at }}</td>
+                                        <td class="actions">
+                                            <a href="/admin/users/edit/{{ user.id }}" class="action-btn edit-btn" title="Edit">
+                                                <i class="icon-edit"></i>
+                                            </a>
+                                            <button class="action-btn delete-btn" data-id="{{ user.id }}" title="Delete">
+                                                <i class="icon-delete"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-row">
+                <div class="dashboard-col">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>Recent Comments</h2>
+                            <a href="/admin/comments" class="view-all">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <div class="comments-list admin-comments">
+                                {% for comment in recent_comments %}
+                                <div class="comment">
+                                    <div class="comment-header">
+                                        <img src="{{ comment.user.avatar }}" alt="{{ comment.user.name }}" class="commenter-avatar">
+                                        <div class="comment-meta">
+                                            <span class="commenter-name">{{ comment.user.name }}</span>
+                                            <span class="comment-date">{{ comment.created_at }}</span>
+                                            <span class="comment-article">on <a href="/articles/{{ comment.article.slug }}">{{ comment.article.title }}</a></span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-body">
+                                        <p>{{ comment.content }}</p>
+                                    </div>
+                                    <div class="comment-actions">
+                                        <button class="btn-text approve-btn {{ 'active' if comment.approved }}" data-id="{{ comment.id }}">
+                                            <i class="icon-check"></i> {{ 'Approved' if comment.approved else 'Approve' }}
+                                        </button>
+                                        <button class="btn-text delete-btn" data-id="{{ comment.id }}">
+                                            <i class="icon-delete"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                {% if not recent_comments %}
+                                <div class="empty-state">
+                                    <p>No recent comments</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-col">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>Quick Actions</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <a href="/admin/articles/create" class="quick-action-card">
+                                    <div class="quick-action-icon">
+                                        <i class="icon-add-article"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <h3>Create Article</h3>
+                                        <p>Add a new article to your website</p>
+                                    </div>
+                                </a>
+                                
+                                <a href="/admin/users/create" class="quick-action-card">
+                                    <div class="quick-action-icon">
+                                        <i class="icon-add-user"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <h3>Add User</h3>
+                                        <p>Create a new user account</p>
+                                    </div>
+                                </a>
+                                
+                                <a href="/admin/categories/create" class="quick-action-card">
+                                    <div class="quick-action-icon">
+                                        <i class="icon-add-category"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <h3>Add Category</h3>
+                                        <p>Create a new article category</p>
+                                    </div>
+                                </a>
+                                
+                                <a href="/admin/settings" class="quick-action-card">
+                                    <div class="quick-action-icon">
+                                        <i class="icon-settings"></i>
+                                    </div>
+                                    <div class="quick-action-content">
+                                        <h3>Settings</h3>
+                                        <p>Update your website settings</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | My Personal Website{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-header">
+            <h1>My Profile</h1>
+        </div>
+        
+        {% if success %}
+        <div class="alert alert-success">
+            {{ success }}
+        </div>
+        {% endif %}
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="profile-content">
+            <div class="profile-sidebar">
+                <div class="profile-avatar">
+                    <img src="{{ user.avatar }}" alt="{{ user.name }}" class="avatar-image">
+                </div>
+                
+                <div class="profile-actions">
+                    <a href="/profile/edit" class="btn btn-primary btn-block">Edit Profile</a>
+                    <a href="/profile/change-password" class="btn btn-secondary btn-block">Change Password</a>
+                    
+                    {% if user.role == 'contributor' or user.role == 'admin' %}
+                    <div class="role-badge">
+                        <span class="badge badge-role">{{ user.role|title }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="profile-details">
+                <div class="profile-section">
+                    <h2>Personal Information</h2>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Name</div>
+                        <div class="detail-value">{{ user.name }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">{{ user.email }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Member Since</div>
+                        <div class="detail-value">{{ user.created_at.strftime('%B %d, %Y') }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Last Login</div>
+                        <div class="detail-value">
+                            {% if user.last_login %}
+                                {{ user.last_login.strftime('%B %d, %Y at %H:%M') }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h2>Bio</h2>
+                    <div class="bio-content">
+                        {% if user.bio %}
+                            <p>{{ user.bio }}</p>
+                        {% else %}
+                            <p class="text-muted">No bio provided. <a href="/profile/edit">Add one now</a>.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h2>Social Links</h2>
+                    
+                    <div class="social-links-list">
+                        <div class="detail-item">
+                            <div class="detail-label">Website</div>
+                            <div class="detail-value">
+                                {% if user.website %}
+                                    <a href="{{ user.website }}" target="_blank">{{ user.website }}</a>
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">GitHub</div>
+                            <div class="detail-value">
+                                {% if user.github %}
+                                    <a href="{{ user.github }}" target="_blank">{{ user.github }}</a>
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">Twitter</div>
+                            <div class="detail-value">
+                                {% if user.twitter %}
+                                    <a href="{{ user.twitter }}" target="_blank">{{ user.twitter }}</a>
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">LinkedIn</div>
+                            <div class="detail-value">
+                                {% if user.linkedin %}
+                                    <a href="{{ user.linkedin }}" target="_blank">{{ user.linkedin }}</a>
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if user.role == 'contributor' or user.role == 'admin' %}
+                <div class="profile-section">
+                    <h2>My Activity</h2>
+                    
+                    <div class="activity-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ user.articles|length }}</div>
+                            <div class="stat-label">Articles</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-number">{{ user.comments|length }}</div>
+                            <div class="stat-label">Comments</div>
+                        </div>
+                    </div>
+                    
+                    {% if user.role == 'contributor' %}
+                    <div class="activity-link">
+                        <a href="/contributor/dashboard" class="btn btn-outline">Go to Contributor Dashboard</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.role == 'admin' %}
+                    <div class="activity-link">
+                        <a href="/admin/dashboard" class="btn btn-outline">Go to Admin Dashboard</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

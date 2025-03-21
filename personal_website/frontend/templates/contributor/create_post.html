@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Article | My Personal Website{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contributor.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% include 'contributor/sidebar.html' %}
+    
+    <div class="dashboard-content">
+        <div class="dashboard-header">
+            <h1>Create New Article</h1>
+        </div>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="editor-container">
+            <form class="article-form" action="/contributor/new-article" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" value="{{ form.title|default('') }}" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label for="category_id">Category</label>
+                        <select id="category_id" name="category_id">
+                            <option value="">Select a category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if form.category_id|default('') == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group form-group-half">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="draft" {% if form.status|default('draft') == 'draft' %}selected{% endif %}>Draft</option>
+                            <option value="published" {% if form.status|default('draft') == 'published' %}selected{% endif %}>Published</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="excerpt">Excerpt</label>
+                    <textarea id="excerpt" name="excerpt" rows="3">{{ form.excerpt|default('') }}</textarea>
+                    <small class="form-text">A brief summary of your article. If left empty, it will be generated from the content.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="featured_image">Featured Image</label>
+                    <div class="featured-image-container">
+                        <div class="featured-image-preview">
+                            {% if form.featured_image %}
+                            <img src="{{ form.featured_image }}" alt="Featured Image Preview">
+                            {% else %}
+                            <span>No image selected</span>
+                            {% endif %}
+                        </div>
+                        <input type="file" id="featured_image" name="featured_image" accept="image/*">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea id="content" name="content" rows="20" required>{{ form.content|default('') }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="tag-selection">
+                        {% for tag in tags %}
+                        <div class="tag-checkbox">
+                            <input type="checkbox" id="tag-{{ tag.id }}" name="tags" value="{{ tag.id }}" 
+                                {% if form.tags and tag.id in form.tags %}checked{% endif %}>
+                            <label for="tag-{{ tag.id }}">{{ tag.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="editor-actions">
+                    <button type="submit" name="action" value="save-draft" class="btn btn-secondary">Save Draft</button>
+                    <button type="submit" name="action" value="publish" class="btn btn-primary">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/contributor.js') }}"></script>
+<script>
+    // Preview featured image
+    document.getElementById('featured_image').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewElement = document.querySelector('.featured-image-preview');
+                previewElement.innerHTML = `<img src="${e.target.result}" alt="Featured Image Preview">`;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Auto-save draft functionality
+    let autoSaveTimeout;
+    const contentInput = document.getElementById('content');
+    const titleInput = document.getElementById('title');
+    
+    function autoSaveDraft() {
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
+        
+        if (title && content) {
+            const autosaveIndicator = document.createElement('div');
+            autosaveIndicator.classList.add('autosave-indicator');
+            autosaveIndicator.textContent = 'Saving draft...';
+            document.querySelector('.editor-actions').prepend(autosaveIndicator);
+            
+            const formData = new FormData(document.querySelector('.article-form'));
+            formData.append('action', 'auto-save');
+            
+            fetch('/contributor/auto-save', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                autosaveIndicator.textContent = 'Draft saved';
+                setTimeout(() => {
+                    autosaveIndicator.remove();
+                }, 2000);
+            })
+            .catch(error => {
+                autosaveIndicator.textContent = 'Error saving draft';
+                autosaveIndicator.classList.add('error');
+                setTimeout(() => {
+                    autosaveIndicator.remove();
+                }, 2000);
+            });
+        }
+    }
+    
+    // Set up auto-save events
+    [contentInput, titleInput].forEach(input => {
+        input.addEventListener('input', () => {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(autoSaveDraft, 10000); // Auto-save after 10 seconds of inactivity
+        });
+    });
+</script>
+{% endblock %}

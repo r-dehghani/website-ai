@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} | My Personal Website{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/article.css') }}">
+{% endblock %}
+
+{% block content %}
+<header class="article-header">
+    <div class="container">
+        <span class="article-category">{{ article.category.name }}</span>
+        <h1>{{ article.title }}</h1>
+        
+        <div class="article-meta">
+            <div class="author-info">
+                <img src="{{ article.author.avatar }}" alt="{{ article.author.name }}" class="author-avatar">
+                <div class="author-details">
+                    <span class="author-name">{{ article.author.name }}</span>
+                    <span class="author-role">{{ article.author.role|title }}</span>
+                </div>
+            </div>
+            
+            <div class="article-details">
+                <span><i class="icon-calendar"></i> {{ article.published_at.strftime('%B %d, %Y') }}</span>
+                <span class="read-time"><i class="icon-clock"></i> {{ article.read_time|default('5') }} min read</span>
+                <span><i class="icon-comment"></i> {{ article.comments|length }} Comments</span>
+                <span><i class="icon-eye"></i> {{ article.views_count }} Views</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+{% if article.featured_image %}
+<figure class="article-featured-image">
+    <img src="{{ article.featured_image }}" alt="{{ article.title }}">
+    {% if article.image_caption %}
+    <figcaption>{{ article.image_caption }}</figcaption>
+    {% endif %}
+</figure>
+{% endif %}
+
+{% if current_user.is_authenticated and (current_user.id == article.author.id or current_user.role == 'admin') %}
+<div class="article-admin-actions">
+    <div class="container">
+        <a href="/admin/articles/edit/{{ article.id }}" class="btn btn-secondary">
+            <i class="icon-edit"></i> Edit Article
+        </a>
+        {% if article.status == 'published' %}
+        <button class="btn btn-secondary draft-btn" data-id="{{ article.id }}">
+            <i class="icon-draft"></i> Move to Draft
+        </button>
+        {% else %}
+        <button class="btn btn-secondary publish-btn" data-id="{{ article.id }}">
+            <i class="icon-publish"></i> Publish
+        </button>
+        {% endif %}
+        <button class="btn btn-danger delete-btn" data-id="{{ article.id }}" data-type="article">
+            <i class="icon-delete"></i> Delete
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<div class="article-content">
+    <div class="container">
+        <div class="content-wrapper">
+            {% if article.has_toc %}
+            <div class="table-of-contents">
+                <h3>Table of Contents</h3>
+                <!-- Will be populated by JavaScript -->
+            </div>
+            {% endif %}
+            
+            <div class="article-body">
+                {{ article.content|safe }}
+            </div>
+            
+            {% if article.tags %}
+            <div class="article-tags">
+                {% for tag in article.tags %}
+                <a href="/tags/{{ tag.slug }}" class="tag">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="article-share">
+                <h3>Share this article</h3>
+                <div class="share-buttons">
+                    <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ article.title|urlencode }}" target="_blank" class="share-button twitter">
+                        <i class="icon-twitter"></i> Twitter
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank" class="share-button facebook">
+                        <i class="icon-facebook"></i> Facebook
+                    </a>
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.url|urlencode }}&title={{ article.title|urlencode }}" target="_blank" class="share-button linkedin">
+                        <i class="icon-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+            
+            <div class="author-bio">
+                <img src="{{ article.author.avatar }}" alt="{{ article.author.name }}" class="author-avatar">
+                <div class="bio-content">
+                    <h3>{{ article.author.name }}</h3>
+                    <p>{{ article.author.bio }}</p>
+                    <div class="author-social">
+                        {% if article.author.github_url %}
+                        <a href="{{ article.author.github_url }}" target="_blank" aria-label="GitHub"><i class="icon-github"></i></a>
+                        {% endif %}
+                        {% if article.author.linkedin_url %}
+                        <a href="{{ article.author.linkedin_url }}" target="_blank" aria-label="LinkedIn"><i class="icon-linkedin"></i></a>
+                        {% endif %}
+                        {% if article.author.twitter_url %}
+                        <a href="{{ article.author.twitter_url }}" target="_blank" aria-label="Twitter"><i class="icon-twitter"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="article-comments">
+    <div class="container">
+        <h2>Comments ({{ article.comments|length }})</h2>
+        
+        {% if current_user.is_authenticated %}
+        <form class="comment-form" action="/articles/{{ article.slug }}/comments" method="post">
+            <div class="form-group">
+                <label for="comment">Leave a comment</label>
+                <textarea id="comment" name="comment" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+        {% else %}
+        <div class="login-to-comment">
+            <p>Please <a href="/login">login</a> or <a href="/register">register</a> to leave a comment.</p>
+        </div>
+        {% endif %}
+        
+        <div class="comments-list">
+            {% if article.comments %}
+                {% for comment in article.comments %}
+                <div class="comment" id="comment-{{ comment.id }}">
+                    <div class="comment-header">
+                        <img src="{{ comment.user.avatar }}" alt="{{ comment.user.name }}" class="commenter-avatar">
+                        <div class="comment-meta">
+                            <span class="commenter-name">{{ comment.user.name }}</span>
+                            <span class="comment-date">{{ comment.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+                        </div>
+                    </div>
+                    <div class="comment-body">
+                        <p>{{ comment.content }}</p>
+                    </div>
+                    <div class="comment-actions">
+                        <button class="btn-text reply-btn" data-id="{{ comment.id }}"><i class="icon-reply"></i> Reply</button>
+                        {% if current_user.is_authenticated and (current_user.id == comment.user.id or current_user.role == 'admin') %}
+                        <button class="btn-text edit-comment" data-id="{{ comment.id }}"><i class="icon-edit"></i> Edit</button>
+                        <form action="/comments/{{ comment.id }}/delete" method="post" class="delete-form">
+                            <button type="submit" class="btn-text delete-comment"><i class="icon-delete"></i> Delete</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Reply Form (Initially Hidden) -->
+                    <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                        <form action="/comments/{{ comment.id }}/reply" method="post">
+                            <div class="form-group">
+                                <textarea name="reply" rows="3" required></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Submit Reply</button>
+                                <button type="button" class="btn btn-text cancel-reply">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    {% if comment.replies %}
+                    <div class="comment-replies">
+                        {% for reply in comment.replies %}
+                        <div class="comment comment-reply" id="comment-{{ reply.id }}">
+                            <div class="comment-header">
+                                <img src="{{ reply.user.avatar }}" alt="{{ reply.user.name }}" class="commenter-avatar">
+                                <div class="comment-meta">
+                                    <span class="commenter-name">{{ reply.user.name }}</span>
+                                    <span class="comment-date">{{ reply.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+                                </div>
+                            </div>
+                            <div class="comment-body">
+                                <p>{{ reply.content }}</p>
+                            </div>
+                            <div class="comment-actions">
+                                {% if current_user.is_authenticated and (current_user.id == reply.user.id or current_user.role == 'admin') %}
+                                <button class="btn-text edit-comment" data-id="{{ reply.id }}"><i class="icon-edit"></i> Edit</button>
+                                <form action="/comments/{{ reply.id }}/delete" method="post" class="delete-form">
+                                    <button type="submit" class="btn-text delete-comment"><i class="icon-delete"></i> Delete</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-comments">
+                    <p>No comments yet. Be the first to share your thoughts!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if related_articles %}
+<section class="related-articles">
+    <div class="container">
+        <h2>You Might Also Like</h2>
+        <div class="articles-grid">
+            {% for article in related_articles %}
+            <article class="article-card">
+                <div class="article-image">
+                    <img src="{{ article.image_url }}" alt="{{ article.title }}">
+                </div>
+                <div class="article-content">
+                    <span class="article-category">{{ article.category }}</span>
+                    <h3><a href="/articles/{{ article.slug }}">{{ article.title }}</a></h3>
+                    <p class="article-excerpt">{{ article.excerpt }}</p>
+                    <div class="article-meta">
+                        <span class="date">{{ article.published_date }}</span>
+                        <span class="read-time">{{ article.read_time }} min read</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this article? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" action="/admin/articles/delete" method="post">
+                    <input type="hidden" name="article_id" id="deleteArticleId">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/article.js') }}"></script>
+<script>
+    // Status change buttons (publish, draft)
+    document.addEventListener('DOMContentLoaded', function() {
+        const publishBtn = document.querySelector('.publish-btn');
+        const draftBtn = document.querySelector('.draft-btn');
+        const deleteBtn = document.querySelector('.delete-btn');
+        
+        if (publishBtn) {
+            publishBtn.addEventListener('click', function() {
+                const articleId = this.dataset.id;
+                changeArticleStatus(articleId, 'published');
+            });
+        }
+        
+        if (draftBtn) {
+            draftBtn.addEventListener('click', function() {
+                const articleId = this.dataset.id;
+                changeArticleStatus(articleId, 'draft');
+            });
+        }
+        
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                const articleId = this.dataset.id;
+                const deleteModal = document.getElementById('deleteModal');
+                const deleteArticleId = document.getElementById('deleteArticleId');
+                
+                deleteArticleId.value = articleId;
+                
+                // Show the modal (in production, use a proper modal library)
+                deleteModal.style.display = 'block';
+                
+                // Close modal when clicking close button
+                deleteModal.querySelector('.close').addEventListener('click', function() {
+                    deleteModal.style.display = 'none';
+                });
+                
+                // Close modal when clicking Cancel
+                deleteModal.querySelector('.btn-secondary').addEventListener('click', function() {
+                    deleteModal.style.display = 'none';
+                });
+            });
+        }
+        
+        // Helper function to change article status
+        function changeArticleStatus(articleId, status) {
+            const formData = new FormData();
+            formData.append('article_id', articleId);
+            formData.append('status', status);
+            
+            fetch('/admin/articles/change-status', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while processing your request.');
+            });
+        }
+        
+        // Toggle comment reply forms
+        const replyBtns = document.querySelectorAll('.reply-btn');
+        replyBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const commentId = this.dataset.id;
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                
+                // Toggle display
+                if (replyForm.style.display === 'none') {
+                    replyForm.style.display = 'block';
+                    replyForm.querySelector('textarea').focus();
+                } else {
+                    replyForm.style.display = 'none';
+                }
+            });
+        });
+        
+        // Cancel reply
+        const cancelReplyBtns = document.querySelectorAll('.cancel-reply');
+        cancelReplyBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const replyForm = this.closest('.reply-form');
+                replyForm.style.display = 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}
